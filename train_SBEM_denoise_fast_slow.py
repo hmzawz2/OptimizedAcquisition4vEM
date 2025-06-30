@@ -9,7 +9,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from model.shiftnet import GShiftNet
-from configs.SBEM_fast_slow_config import get_SBEM_denoise_config
+from configs.supervised_denoise_config import get_SBEM_denoise_config
 from pytorch_msssim import ssim
 from tifffile import imwrite
 import torch.nn.functional as F

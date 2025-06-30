@@ -139,7 +139,7 @@ def get_split_stack_for_pred(
 
     return name_list, volume_im, coordinate_dict, input_data_type
 
-def singlebatch_test_save(single_coordinate, output_image, z_scale=None):
+def singlebatch_test_save(single_coordinate, output_image):
     stack_start_w = int(single_coordinate['stack_start_w'])
     stack_end_w = int(single_coordinate['stack_end_w'])
     patch_start_w = int(single_coordinate['patch_start_w'])
@@ -154,12 +154,6 @@ def singlebatch_test_save(single_coordinate, output_image, z_scale=None):
     stack_end_s = int(single_coordinate['stack_end_s'])
     patch_start_s = int(single_coordinate['patch_start_s'])
     patch_end_s = int(single_coordinate['patch_end_s'])
-
-    if z_scale is not None:
-        stack_start_s *= z_scale
-        stack_end_s *= z_scale
-        patch_start_s *= z_scale
-        patch_end_s *= z_scale
 
     output_block = output_image[:, patch_start_h:patch_end_h, patch_start_w:patch_end_w]
     return output_block, stack_start_w, stack_end_w, stack_start_h, stack_end_h, stack_start_s, stack_end_s
@@ -202,25 +196,3 @@ def sort_paths(paths, position_from_end=1):
         raise NotImplementedError(f"Cannot match any digits in path: {filename.name}")
 
     return sorted(paths, key=lambda x: extract_digit_from_end(x, position_from_end))
-
-
-if __name__ == "__main__":
-    name_list, volume_im, coordinate_dict, input_data_type = get_split_stack_for_pred(160, 160, 16, 0.1, "/home/chenbh/data/SRDTrans/CREMI_tiny", 0)
-    print(len(name_list))
-
-    ans = np.zeros((volume_im.shape[0]*10, volume_im.shape[1], volume_im.shape[2]), dtype=np.uint8)
-
-    testset = predset(name_list, coordinate_dict, volume_im)
-    testloader = DataLoader(testset, batch_size=1, shuffle=False)
-
-    for iteration, (patch, coordinate) in enumerate(testloader):
-        
-        print(patch.shape)
-        pred = torch.rand((patch.shape[0], patch.shape[1]*10, patch.shape[2], patch.shape[3]))
-        
-        pred = (pred.detach().cpu().numpy() * 255).astype(np.uint8).squeeze()
-
-        output_block, stack_start_w, stack_end_w, stack_start_h, stack_end_h, stack_start_s, stack_end_s = singlebatch_test_save(coordinate, pred, 10)
-
-        ans[stack_start_s:stack_end_s, stack_start_h:stack_end_h, stack_start_w:stack_end_w] = output_block
-    
