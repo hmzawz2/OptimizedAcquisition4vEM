@@ -55,7 +55,7 @@ train_loader = get_SBEM2_z50_loader(
     shuffle=True,
     num_workers=args.num_workers,
     dataset_num=6000,
-    patch_size=256,
+    patch_size=128,
     patch_t=32,
     nbr_frames=args.nbr_frame,
 )
@@ -65,7 +65,7 @@ test_loader = get_SBEM2_z50_loader(
     shuffle=False,
     num_workers=args.num_workers,
     dataset_num=1000,
-    patch_size=256,
+    patch_size=128,
     patch_t=32,
     nbr_frames=args.nbr_frame,
 )

@@ -84,7 +84,6 @@ def train(args, epoch):
 
     model.train()
 
-    t = time.time()
     for bidx, data_dict in enumerate(train_loader):
 
         # Build input batch
@@ -120,7 +119,6 @@ def train(args, epoch):
 
             # Reset metrics
             # losses, psnrs, ssims, lpipss = utils.init_meters(args.loss)
-            # t = time.time()
 
 
 def test(args, epoch):

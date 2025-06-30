@@ -1,0 +1,30 @@
+name: optimized_vem
+channels:
+- defaults
+- conda-forge
+- pytorch
+dependencies:
+- python=3.10
+- pytorch=2.4.1
+- torchvision=0.19.1
+- torchaudio=2.4.1
+- cudatoolkit=11.8
+- numpy=2.0.1
+- scipy=1.14.1
+- scikit-image=0.24.0
+- scikit-learn
+- matplotlib=3.10.0
+- pandas=2.2.3
+- opencv-python=4.10.0.84
+- imageio=2.35.1
+- imagecodecs=2024.12.30
+- tifffile
+- pillow
+- addict=2.4.0
+- easydict=1.13
+- ml_collections=1.0.0
+- absl-py=2.1.0
+- einops=0.8.0
+- tqdm
+- tensorboard=2.18.0
+- requests

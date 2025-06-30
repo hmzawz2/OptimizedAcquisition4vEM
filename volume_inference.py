@@ -1,4 +1,4 @@
-from others.stack_split_utils import *
+from utils.stack_split_utils import *
 from einops import rearrange
 from tifffile import imread, imwrite
 import time

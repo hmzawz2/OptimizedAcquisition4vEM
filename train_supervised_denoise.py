@@ -1,6 +1,6 @@
 import os
-import sys
 import time
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -9,21 +9,19 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from model.shiftnet import GShiftNet
-from configs.supervised_denoise_config import get_SBEM_denoise_config
+from configs.self_supervised_denoise_config import get_config
 from pytorch_msssim import ssim
 from tifffile import imwrite
-import torch.nn.functional as F
 from utils import utils
-from einops import rearrange
 import lpips
 
 
 ##### Parse CmdLine Arguments #####
-args = get_SBEM_denoise_config()
+args = get_config()
 print(args)
 
 save_loc = os.path.join(
-    args.checkpoint_dir, "saved_models_final", args.dataset, args.exp_name
+    args.checkpoint_dir, args.dataset, args.exp_name
 )
 if not os.path.exists(save_loc):
     os.makedirs(save_loc)
@@ -46,27 +44,19 @@ torch.manual_seed(args.random_seed)
 if args.cuda:
     torch.cuda.manual_seed(args.random_seed)
 
-from dataset import get_SBEM2_loader
+from dataset import get_self_supervised_dataloader
 
-train_loader = get_SBEM2_loader(
+train_loader = get_self_supervised_dataloader(
+    Path(args.data_root),
     "train",
-    args.data_root,
-    shuffle=True,
-    num_workers=args.num_workers,
-    dataset_num=6000,
-    patch_size=256,
-    patch_t=32,
-    nbr_frames=args.nbr_frame,
+    patch_size = (5, 128, 128),
+    num_samples_per_epoch = 540,
 )
-test_loader = get_SBEM2_loader(
+test_loader = get_self_supervised_dataloader(
+    Path(args.val_data_root),
     "test",
-    args.val_data_root,
-    shuffle=False,
-    num_workers=args.num_workers,
-    dataset_num=1000,
-    patch_size=256,
-    patch_t=32,
-    nbr_frames=args.nbr_frame,
+    patch_size = (5, 128, 128),
+    num_samples_per_epoch = 540,
 )
 
 
@@ -84,19 +74,16 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
     optimizer, mode="min", factor=0.5, patience=5, verbose=True
 )
 
-lpips_dist = lpips.LPIPS(net='vgg').cuda()
 def train(args, epoch):
-    losses, psnrs, ssims, lpipss = utils.init_meters(args.loss)
 
     model.train()
     # criterion.train()
 
-    t = time.time()
     for bidx, data_dict in enumerate(train_loader):
 
         # Build input batch
-        images = data_dict["input_volume"]
-        gts = data_dict["gt_volume"]
+        images = data_dict["source"]
+        gts = data_dict["target"]
     
         images = images.cuda()
         gts = gts.cuda()
@@ -114,25 +101,7 @@ def train(args, epoch):
 
         ssim_loss = torch.tensor(0)
 
-        # Lcont
-        lpips_dists_o1 = []
-        lpips_dists_o2 = []
-        out1_pkg = out1.squeeze(0)
-        out2_pkg = out2.squeeze(0)
-        for i in range(1, out1_pkg.shape[1]):
-            lpips_dists_o1.append(torch.mean(lpips_dist(out1_pkg[0, i-1], out1_pkg[0, i], normalize=True)))
-            lpips_dists_o2.append(torch.mean(lpips_dist(out2_pkg[0, i-1], out2_pkg[0, i], normalize=True)))
-        lpips_dists_o1 = torch.cat([t.unsqueeze(0) for t in lpips_dists_o1], dim=0)
-        lpips_dists_o2 = torch.cat([t.unsqueeze(0) for t in lpips_dists_o2], dim=0)
-        lpips_gini_o1 = utils.compute_gini(lpips_dists_o1)
-        lpips_gini_o2 = utils.compute_gini(lpips_dists_o2)
-        lpips_dists_o1 = torch.mean(lpips_dists_o1)
-        lpips_dists_o2 = torch.mean(lpips_dists_o2)
-
-        loss_lpips = (lpips_dists_o1 + lpips_gini_o1) + (lpips_dists_o2 + lpips_gini_o2)
-
-
-        loss = l1_loss + ssim_loss + loss_lpips * 0.1
+        loss = l1_loss + ssim_loss
 
         loss.backward()
         optimizer.step()
@@ -163,7 +132,6 @@ def test(args, epoch):
     losses, psnrs, ssims, lpipss = utils.init_meters(args.loss)
     model.eval()
 
-    t = time.time()
     with torch.no_grad():
         for bidx, data_dict in enumerate(tqdm(test_loader)):
             images = data_dict["input_volume"]
