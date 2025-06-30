@@ -10,9 +10,9 @@ def add_argument_group(name):
 
 # Dataset
 data_arg = add_argument_group('Dataset')
-data_arg.add_argument('--dataset', type=str, default='vimeo90k')
-data_arg.add_argument('--data_root', type=str)
-data_arg.add_argument('--val_data_root', type=str)
+data_arg.add_argument('--dataset', type=str)
+data_arg.add_argument('--data_root', type=str, help="training data root")
+data_arg.add_argument('--val_data_root', type=str, help="validation data root")
 
 # Model
 model_choices = ["unet_18", "unet_34"]
@@ -22,8 +22,7 @@ model_arg.add_argument('--nbr_frame' , type=int , default=4)
 model_arg.add_argument('--nbr_width' , type=int , default=1)
 model_arg.add_argument('--joinType' , choices=["concat" , "add" , "none"], default="concat")
 model_arg.add_argument('--upmode' , choices=["transpose","upsample"], type=str, default="transpose")
-model_arg.add_argument('--n_outputs' , type=int, default=1,
-                        help="For Kx FLAVR, use n_outputs k-1")
+model_arg.add_argument('--n_outputs' , type=int, default=1)
 model_arg.add_argument('--sr_ratio', type=int, default=8)
 
 # Training / test parameters
@@ -40,9 +39,7 @@ learn_arg.add_argument('--resume', action='store_true')
 learn_arg.add_argument('--resume_exp', type=str, default=None)
 learn_arg.add_argument('--checkpoint_dir', type=str ,default="./ckpt")
 learn_arg.add_argument('--tensorboard_dir', type=str, default="./log")
-learn_arg.add_argument("--pretrained" , type=str,
-                        help="Load from a pretrained model.")
-learn_arg.add_argument('--damage_ratio', type=float, default=0)
+learn_arg.add_argument("--pretrained" , type=str, help="point to a pretrained model path (.pth file)")
 
 # Misc
 misc_arg = add_argument_group('Misc')

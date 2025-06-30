@@ -10,7 +10,7 @@ from torchvision import transforms
 from einops import rearrange
 import torch.nn.functional as F
 from skimage.transform import rescale
-from .base_dataset import BaseVolumeDataset, add_damage
+from .base_dataset import BaseVolumeDataset
 from scipy.ndimage import zoom
 
 def R2R(vol, variance=0.05):
@@ -176,8 +176,6 @@ class EPFL_Dataset(BaseVolumeDataset):
         input_volume = [torch.from_numpy(np.ascontiguousarray(v).astype(np.float32)) for v in input_volume]
         gt_volume = [torch.from_numpy(np.ascontiguousarray(v).astype(np.float32)) for v in gt_volume]  
 
-        if self.is_training and random.random() < self.damage_ratio:
-            input_volume = add_damage(input_volume)
         return {"input_volume":input_volume, "gt_volume":gt_volume}
 
     def __len__(self):

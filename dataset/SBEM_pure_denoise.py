@@ -10,7 +10,7 @@ from torchvision import transforms
 from einops import rearrange
 import torch.nn.functional as F
 from skimage.transform import rescale
-from .base_dataset import BaseVolumeDataset, add_damage
+from .base_dataset import BaseVolumeDataset
 import torch.utils.data.dataset as dataset
 from scipy.ndimage import zoom, gaussian_filter, sobel
 

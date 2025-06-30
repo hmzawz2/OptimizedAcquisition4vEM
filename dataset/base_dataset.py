@@ -170,20 +170,3 @@ class BaseVolumeDataset(data.Dataset):
 
     def __len__(self):
         return len(self.patch_name_list)
-
-def add_damage(inputs, max_damage_num=5):
-    for inpu in inputs:
-        for i in [1, 2]:
-            layer = inpu[i]
-            num_squares = np.random.randint(1, max_damage_num)
-            height, width = layer.shape
-            for _ in range(num_squares):
-                lth = np.random.randint(5, 25)
-                x = np.random.randint(0, width - lth)
-                y = np.random.randint(0, height - lth)
-                seed = np.random.rand()
-                if seed >= 0.5:
-                    layer[y:y+lth, x:x+lth] = 1 - 1e-2*seed
-                else:
-                    layer[y:y+lth, x:x+lth] = 0 + 1e-2*seed
-    return inputs

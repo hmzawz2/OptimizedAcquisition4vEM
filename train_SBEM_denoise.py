@@ -9,14 +9,14 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from model.shiftnet import GShiftNet
-from configs.SBEM_denoise_config import get_SBEM_denoise_config
+from configs.self_supervised_denoise_config import get_config
 from pytorch_msssim import ssim
 from tifffile import imwrite
 import torch.nn.functional as F
 from utils import utils
 
 ##### Parse CmdLine Arguments #####
-args = get_SBEM_denoise_config()
+args = get_config()
 print(args)
 
 save_loc = os.path.join(
@@ -81,34 +81,19 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
 
 
 def train(args, epoch):
-    losses, psnrs, ssims, lpipss = utils.init_meters(args.loss)
 
     model.train()
-    # criterion.train()
 
     t = time.time()
     for bidx, data_dict in enumerate(train_loader):
 
         # Build input batch
-        images = data_dict["input_volume"]
-        gts = data_dict["gt_volume"]
-
-        images = images.cuda()
-        gts = gts.cuda()
+        images = data_dict["input_volume"].to(device)
+        gts = data_dict["gt_volume"].to(device)
 
         # Forward
         optimizer.zero_grad()
         out = model(images)
-        
-        # out = rearrange(out, 'n c d h w -> n (c d) h w')
-        # gts = rearrange(gts, 'n c d h w -> n (c d) h w')
-        # loss, loss_specific = criterion(out, gts)
-
-        # # Save loss values
-        # for k, v in losses.items():
-        #     if k != "total":
-        #         v.update(loss_specific[k].item())
-        # losses["total"].update(loss.item())
 
         l1_loss = torch.nn.L1Loss()(out, gts)
         ssim_loss = 1 - ssim(out, gts, data_range=1.0)
