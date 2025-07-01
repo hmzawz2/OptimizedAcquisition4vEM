@@ -38,18 +38,17 @@ if args.cuda:
 train_loader = get_self_supervised_dataloader(
     Path(args.data_root),
     "train",
-    patch_size = (5, 128, 128),
+    patch_size = (9, 128, 128),
     num_samples_per_epoch = 540,
 )
 val_loader = get_self_supervised_dataloader(
     Path(args.val_data_root),
     "val",
-    patch_size = (5, 128, 128),
+    patch_size = (32, 128, 128),
     num_samples_per_epoch = 32,
 )
 
 ##### Model, Optimizer, Scheduler #####
-print(f"Building model: {args.model}")
 model = GShiftNet()
 model = torch.nn.DataParallel(model).to(device)
 
@@ -70,10 +69,13 @@ def train(epoch: int, global_step: int):
         # Forward pass
         optimizer.zero_grad()
         prediction = model(source)
+        prediction_aux = model(target)
 
         # Loss calculation and backward pass
         total_loss, individual_losses = criterion(prediction, target)
-        total_loss.backward()
+        total_loss_aux, _ = criterion(prediction_aux, source)
+        all_loss = total_loss + total_loss_aux
+        all_loss.backward()
         optimizer.step()
 
         # Update loss trackers
@@ -86,7 +88,7 @@ def train(epoch: int, global_step: int):
         if i % args.log_iter == 0:
             current_step = global_step + i
             log_prefix = f"Epoch: {epoch} [{i}/{len(train_loader)}]"
-            log_items = [f"{name}: {tracker.avg:.4f}" for name, tracker in loss_trackers.items()]
+            log_items = [f"{name}_loss: {tracker.avg:.4f}" for name, tracker in loss_trackers.items()]
             tqdm.write(f"{log_prefix}\t" + "\t".join(log_items))
 
             for name, tracker in loss_trackers.items():

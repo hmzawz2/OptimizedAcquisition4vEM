@@ -15,13 +15,9 @@ data_arg.add_argument('--data_root', type=str, help="training data root")
 data_arg.add_argument('--val_data_root', type=str, help="validation data root")
 
 # Model
-model_choices = ["unet_18", "unet_34"]
 model_arg = add_argument_group('Model')
-model_arg.add_argument('--model', choices=model_choices, type=str, default="unet_18")
 model_arg.add_argument('--nbr_frame' , type=int , default=4)
 model_arg.add_argument('--nbr_width' , type=int , default=1)
-model_arg.add_argument('--joinType' , choices=["concat" , "add" , "none"], default="concat")
-model_arg.add_argument('--upmode' , choices=["transpose","upsample"], type=str, default="transpose")
 
 # Training / test parameters
 learn_arg = add_argument_group('Learning')
@@ -45,7 +41,7 @@ misc_arg = add_argument_group('Misc')
 misc_arg.add_argument('--exp_name', type=str, default='exp')
 misc_arg.add_argument('--log_iter', type=int, default=60)
 misc_arg.add_argument('--num_gpu', type=int, default=1)
-misc_arg.add_argument('--random_seed', type=int, default=12345)
+misc_arg.add_argument('--random_seed', type=int, default=3407)
 misc_arg.add_argument('--num_workers', type=int, default=16)
 misc_arg.add_argument('--use_tensorboard', action='store_true')
 misc_arg.add_argument('--val_freq', type=int, default=1)

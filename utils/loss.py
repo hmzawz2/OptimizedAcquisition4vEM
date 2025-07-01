@@ -47,7 +47,7 @@ class Loss(nn.modules.loss._Loss):
                 loss_function = nn.L1Loss()
             elif loss_type == 'SSIM':
                 # data_range should match the expected range of the input tensors
-                loss_function = pytorch_msssim.SSIM(data_range=1.0, size_average=True, channel=1)
+                loss_function = pytorch_msssim.SSIM(data_range=1.0, channel=1, win_size=9)
             else:
                 raise ValueError(f"Unsupported loss type: {loss_type}")
 

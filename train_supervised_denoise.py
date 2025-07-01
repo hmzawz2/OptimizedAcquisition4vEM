@@ -53,7 +53,6 @@ val_loader = get_supervised_dataloader(
 )
 
 ##### Model, Optimizer, Scheduler #####
-print(f"Building model: {args.model}")
 model = GShiftNet()
 model = torch.nn.DataParallel(model).to(device)
 
@@ -90,7 +89,7 @@ def train(epoch: int, global_step: int):
         if i % args.log_iter == 0:
             current_step = global_step + i
             log_prefix = f"Epoch: {epoch} [{i}/{len(train_loader)}]"
-            log_items = [f"{name}: {tracker.avg:.4f}" for name, tracker in loss_trackers.items()]
+            log_items = [f"{name}_loss:{tracker.avg:.4f}" for name, tracker in loss_trackers.items()]
             tqdm.write(f"{log_prefix}\t" + "\t".join(log_items))
 
             for name, tracker in loss_trackers.items():
