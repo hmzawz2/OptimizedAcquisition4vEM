@@ -25,15 +25,15 @@ class SupervisedDenoisingDataset(Dataset):
         super().__init__()
         self.is_training = is_training
         self.use_fast_slow_emulation = use_fast_slow_emulation
-        self.num_samples = num_samples_per_epoch if self.is_training else 100
+        self.num_samples = num_samples_per_epoch
 
         # Load volumes. For very large files, consider memory mapping:
         # self.slow_volume = imread(slow_scan_path, aszarr=True)
         if ~slow_scan_path.is_file():
-            slow_scan_path = list(slow_scan_path.glob("cn-*.tif"))[0]
+            slow_scan_path = list(slow_scan_path.glob("*.tif"))[0]
             print(f"Input slow volume path is dir, use {str(slow_scan_path)}.")
         if ~fast_scan_path.is_file():
-            fast_scan_path = list(fast_scan_path.glob("n-*.tif"))[0]
+            fast_scan_path = list(fast_scan_path.glob("*.tif"))[0]
             print(f"Input fast volume path is dir, use {str(fast_scan_path)}.")
         self.target_volume = imread(slow_scan_path)
         self.source_volume = imread(fast_scan_path)
@@ -115,6 +115,8 @@ class SupervisedDenoisingDataset(Dataset):
         target_tensor = torch.from_numpy(np.ascontiguousarray(target_patch)).unsqueeze(0)
         
         return {"source": source_tensor, "target": target_tensor}
+
+# --- Dataloader Function ---
 
 def get_supervised_dataloader(slow_scan_path: Path,
                               fast_scan_path: Path,

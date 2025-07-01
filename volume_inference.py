@@ -1,10 +1,10 @@
 from utils.stack_split_utils import *
-from einops import rearrange
+import numpy as np
 from tifffile import imread, imwrite
 import time
 from tqdm import tqdm
 from model.shiftnet import GShiftNet
-from configs.supervised_denoise_config import get_config
+from configs.self_supervised_denoise_config import get_config
 args = get_config()
 
 def run_model(
@@ -44,7 +44,7 @@ def run_model(
     #  Change Type & Return Final Result
     # ----------
     pred_volume = np.clip(pred_volume, 0.0, 1.0)
-    res = (pred_volume * 255).astype("uint8")
+    res = (pred_volume * 255).astype(np.uint8)
     return res
 
 

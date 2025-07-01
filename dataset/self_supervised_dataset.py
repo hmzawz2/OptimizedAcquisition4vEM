@@ -40,7 +40,7 @@ class SelfSupervisedDenoisingDataset(Dataset):
         
         super().__init__()
         self.is_training = is_training
-        self.num_samples = num_samples_per_epoch if self.is_training else 100
+        self.num_samples = num_samples_per_epoch
 
         # Load the single noisy volume. For very large files, consider memory mapping.
         if ~volume_path.is_file():

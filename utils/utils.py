@@ -14,20 +14,16 @@ from pathlib import Path
 import numpy as np
 from einops import rearrange
 from tifffile import imread, imwrite
-from lpips import LPIPS
 
-# calc_lpips = LPIPS(net='vgg')
-# calc_lpips = calc_lpips.cuda() if torch.cuda.is_available() else calc_lpips.cpu()
 
 def init_meters(loss_str):
     losses = init_losses(loss_str)
     psnrs = AverageMeter()
     ssims = AverageMeter()
-    lpipss = AverageMeter()
-    return losses, psnrs, ssims, lpipss
+    return losses, psnrs, ssims
 
 
-def eval_metrics(output, gt, psnrs, ssims, lpipss=None):
+def eval_metrics(output, gt, psnrs, ssims):
     # PSNR should be calculated for each image, since sum(log) =/= log(sum).
     for b in range(gt.size(0)):
         psnr = calc_psnr(output[b], gt[b])
@@ -39,11 +35,6 @@ def eval_metrics(output, gt, psnrs, ssims, lpipss=None):
             data_range=1.0,
         )
         ssims.update(ssim)
-
-        # lpips = calc_lpips(output[b], gt[b], normalize=True)
-        # lpipss.update(lpips)
-        if lpipss:
-            lpipss.update(torch.from_numpy(np.zeros(1)))
 
 
 def init_losses(loss_str):
@@ -80,7 +71,7 @@ def calc_psnr(pred, gt):
     return -10 * math.log10(diff)
 
 
-def save_checkpoint(state, directory, is_best, exp_name, filename="checkpoint.pth"):
+def save_checkpoint(state, directory, is_best, filename="checkpoint.pth"):
     """Saves checkpoint to disk"""
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -97,62 +88,6 @@ def log_tensorboard(writer, loss, psnr, ssim, lpips, lr, timestep, mode="train")
     if mode == "train":
         writer.add_scalar("lr", lr, timestep)
 
-
-class StyleAndPerceptionLoss(nn.Module):
-
-    class VGG(nn.Module):
-        def __init__(self, features):
-            super(StyleAndPerceptionLoss.VGG, self).__init__()
-            self.features = features
-            self.layer_name_mapping = {
-                "3": "relu1_2",
-                "8": "relu2_2",
-                "15": "relu3_3",
-                "22": "relu4_3",
-            }
-            for p in self.parameters():
-                p.requires_grad = False
-
-        def forward(self, x):
-            outs = []
-            for name, module in self.features._modules.items():
-                x = module(x)
-                if name in self.layer_name_mapping:
-                    outs.append(x)
-            return outs
-
-    @staticmethod
-    def gram_matrix(y):
-        b, ch, h, w = y.shape
-        features = y.view(b, ch, w * h)
-        features_t = features.transpose(1, 2)
-        gram = features.bmm(features_t) / (ch * h * w)
-        return gram
-
-    def __init__(self, perception_coff=1.0, style_coff=1e6) -> None:
-        super().__init__()
-        vgg = vgg16(pretrained=True)
-        vgg = StyleAndPerceptionLoss.VGG(vgg.features[:23]).eval()
-        self.vgg16 = vgg
-        self.perception_coff = perception_coff
-        self.style_coff = style_coff
-        self.mse_loss = nn.MSELoss()
-
-    def forward(self, pred, target):
-        pred_features = self.vgg16(pred)
-        target_features = self.vgg16(target)
-        # style loss
-        style_grams = [StyleAndPerceptionLoss.gram_matrix(x) for x in target_features]
-        pred_grams = [StyleAndPerceptionLoss.gram_matrix(x) for x in pred_features]
-        # Style Loss
-        style_loss = 0
-        for a, b in zip(pred_grams, style_grams):
-            style_loss += self.mse_loss(a, b)
-        # Preception Loss
-        perception_loss = 0
-        for a, b in zip(pred_features, target_features):
-            perception_loss += self.mse_loss(a, b)
-        return self.perception_coff * perception_loss + self.style_coff * style_loss
 
 def compute_gini(distances: torch.Tensor) -> torch.Tensor:
     """
