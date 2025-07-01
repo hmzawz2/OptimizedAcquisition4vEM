@@ -9,8 +9,8 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from tifffile import imwrite
 from model.shiftnet import GShiftNet
-from configs.supervised_denoise_config import get_config
-from dataset import get_supervised_dataloader
+from configs.self_supervised_denoise_config import get_config
+from dataset import get_self_supervised_dataloader
 from utils import utils
 from utils.loss import Loss
 
@@ -35,21 +35,17 @@ if args.cuda:
     torch.cuda.manual_seed_all(args.random_seed)
 
 ##### Dataloaders #####
-train_loader = get_supervised_dataloader(
-    Path(args.data_root),
+train_loader = get_self_supervised_dataloader(
     Path(args.data_root),
     "train",
     patch_size = (5, 128, 128),
-    num_samples_per_epoch = 61,
-    use_fast_slow_emulation = (args.use_fast_slow == 1),
+    num_samples_per_epoch = 540,
 )
-val_loader = get_supervised_dataloader(
-    Path(args.val_data_root),
+val_loader = get_self_supervised_dataloader(
     Path(args.val_data_root),
     "val",
     patch_size = (5, 128, 128),
     num_samples_per_epoch = 32,
-    use_fast_slow_emulation = (args.use_fast_slow == 1),
 )
 
 ##### Model, Optimizer, Scheduler #####

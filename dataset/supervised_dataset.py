@@ -30,10 +30,10 @@ class SupervisedDenoisingDataset(Dataset):
         # Load volumes. For very large files, consider memory mapping:
         # self.slow_volume = imread(slow_scan_path, aszarr=True)
         if ~slow_scan_path.is_file():
-            slow_scan_path = list(slow_scan_path.glob("*.tif"))[0]
+            slow_scan_path = list(slow_scan_path.glob("*slow*.tif"))[0]
             print(f"Input slow volume path is dir, use {str(slow_scan_path)}.")
         if ~fast_scan_path.is_file():
-            fast_scan_path = list(fast_scan_path.glob("*.tif"))[0]
+            fast_scan_path = list(fast_scan_path.glob("*fast*.tif"))[0]
             print(f"Input fast volume path is dir, use {str(fast_scan_path)}.")
         self.target_volume = imread(slow_scan_path)
         self.source_volume = imread(fast_scan_path)
@@ -48,7 +48,7 @@ class SupervisedDenoisingDataset(Dataset):
         if self.use_fast_slow_emulation:
             self.fetch_height = patch_height * 2
             self.fetch_width = patch_width * 2
-            self.fetch_depth = patch_depth * 2
+            self.fetch_depth = patch_depth
         else:
             self.fetch_height = patch_height
             self.fetch_width = patch_width

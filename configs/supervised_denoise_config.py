@@ -5,10 +5,11 @@ def get_config():
     args, _ = get_args()
 
     # Dataset info
-    args.dataset = "SBEM3_Z25"
-    args.exp_name = "SBEM3_Z50_diag_2_fz_R2R"
-    args.data_root = "/home/chenbohao/cbh_3p2/data/huayunfeng/SBEM_type2/norm_pure_noisy"
-    args.val_data_root = "/home/chenbohao/cbh_3p2/data/huayunfeng/SBEM_type2/norm_pure_noisy"
+    args.dataset = "SBEM2_Z50"
+    args.exp_name = "pure_fast"
+    args.data_root = "/home/chenbohao/cbh_3p2/data/huayunfeng/SBEM_type2/train"
+    args.val_data_root = "/home/chenbohao/cbh_3p2/data/huayunfeng/SBEM_type2/train"
+    args.use_fast_slow = 1
 
     # Training info
     args.loss = "1*L1+1*SSIM"
