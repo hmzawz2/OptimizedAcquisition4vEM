@@ -1,63 +1,117 @@
-
 # OptimizedAcquisition4vEM
 
-**Data acquisition strategy of volume electron microscopy enables accurate image stack denoising using machine learning**
+This repository contains the official implementation for our work on accelerating volume electron microscopy (vEM) through a synergistic "Fast-Scan, AI-Restore" strategy. Our method enables significant speed-ups in data acquisition while maintaining high data quality, and even pushes the boundary of achievable axial resolution in SBEM.
 
-This repository provides the official implementation of our method for optimizing data acquisition in block-face volume electron microscopy (vEM). We demonstrate that deep learning-based denoising—under both supervised and self-supervised settings can accurately restore 3D structural details from noisy image stacks, allowing significantly higher imaging throughput without compromising downstream structural analysis.
+## Overview
 
-## 📦 Installation
+Our research addresses a long-standing bottleneck in volume electron microscopy (vEM): the trade-off between imaging speed, data quality, and sample damage. We propose and validate a new paradigm, "Fast-Scan, AI-Restore," which decouples data acquisition from quality enhancement. The core idea is to acquire noisy-but-complete data at high speeds and then use deep learning models to restore high-fidelity structural information.
 
-We recommend setting up a dedicated conda environment:
+Ultimately, this work provides two key contributions enabled by this repository's code:
+1.  A practical workflow to significantly accelerate existing vEM tasks using supervised denoising.
+2.  A novel capability to achieve higher axial resolution with SBEM by applying self-supervised denoising to ultra-thin sections.
 
-```bash
-conda env create -f environment_optimized_vem.yml
-conda activate optimized_vem
-```
 
-## 🧠 Features
+## Code Structure
 
-- Deep learning-based denoising framework for vEM
-- Supports both supervised and self-supervised training
-- Enables throughput-oriented acquisition strategies
-- Generalizable to SBEM, FIB-SEM, and other block-face EM systems
-- Includes scripts for training, inference, and evaluation
-
-## 🗂 Directory Structure
+The repository is organized as follows:
 
 ```
 .
-├── model/                           # Denoising network architectures
-├── dataset/                         # Dataset loading and preprocessing
-├── utils/                           # Auxiliary functions and tools
-├── ckpt/                            # Checkpoints of trained models
-├── configs/                         # Config files for training
-├── log/                             # Training log and TensorBoard files
-├── figs/                            # Figures used in README or paper
-├── data/                            # Sample input stacks
-├── environment_optimized_vem.yml    # Conda environment configuration
-├── train_supervised_denoise.py      # Supervised training script
-├── train_self_supervised_denoise.py # Self-supervised training script
-├── volume_inference.py              # Denoising inference script
+├── model/                             # Denoising network architectures
+├── dataset/                           # Dataset loading and preprocessing
+├── utils/                             # Auxiliary functions
+├── ckpt/                              # Checkpoints will be saved here
+├── configs/                           # Configuration files(.py)
+├── log/                               # Training logs and TensorBoard files
+├── figs/                              # Figures for documentation
+├── data/                              # Directory for sample input stacks
+├── environment_optimized_vem.yml      # Conda environment configuration
+├── train_supervised_denoise.py        # Supervised training script
+├── train_self_supervised_denoise.py   # Self-supervised training script
+├── volume_inference.py                # Inference script
 └── README.md
 ```
 
-## 🚀 Getting Started
+## Installation
 
-1. Place your own vEM `.tif` stack in `data/`.
-2. Modify the configuration file in `configs/` to match your dataset and model.
-3. Run supervised training:
-   ```bash
-   python train_supervised_denoise.py --config configs/supervised.yaml
-   ```
-4. Or run self-supervised training:
-   ```bash
-   python train_self_supervised_denoise.py --config configs/selfsup.yaml
-   ```
-5. Inference on a noisy stack:
-   ```bash
-   python volume_inference.py --input data/noisy_stack.tif --ckpt ckpt/best.pth
-   ```
+We recommend using Conda to manage the environment for consistency and reproducibility.
 
-## 📄 License
+1.  **Clone this repository:**
+    ```bash
+    git clone [https://github.com/hmzawz2/OptimizedAcquisition4vEM.git](https://github.com/hmzawz2/OptimizedAcquisition4vEM.git)
+    cd OptimizedAcquisition4vEM
+    ```
 
-This project will be released under an open-source license (TBD).
+2.  **Create and activate the Conda environment:**
+    ```bash
+    conda env create -f environment_optimized_vem.yml
+    conda activate optimized_vem
+    ```
+
+## Usage Guide
+
+### 1. Data Preparation
+
+You will need to prepare your own datasets for training.
+- **Format:** Currently, the code only supports **single-stack TIF files** in 8-bit format.
+- **Registration:** All volumes are assumed to be properly registered.
+
+* **For Supervised Denoising:**
+    * You need pairs of registered fast-scan (noisy) and slow-scan (clean) volumes.
+    * **Important:** Please ensure your filenames contain `'fast'` and `'slow'` respectively (e.g., `my_sample_fast.tif`, `my_sample_slow.tif`). The script uses this convention to automatically identify the source and target volumes within the specified data directory.
+
+* **For Self-Supervised Denoising:**
+    * You only need a single fast-scan (noisy) volume.
+    * **Crucially, the noise distribution should be as uniform as possible throughout the volume.** Significant variations in brightness, contrast, or noise levels between slices can degrade the performance of self-supervised methods.
+   <table>
+      <tr>
+         <td align="center"><b>non-uniform noise distribution</b></td>
+         <td align="center"><b>uniform noise distribution</b></td>
+      </tr>
+      <tr>
+         <td><img src="figs/changing-50nm.gif" alt="Non-uniform noise" width="98%"></td>
+         <td><img src="figs/uniform-50nm.gif" alt="Uniform noise" width="98%"></td>
+      </tr>
+   </table>
+
+### 2. Configuration
+
+This project uses configuration files located in the `configs/` directory instead of command-line arguments. Before running any script, please **edit the corresponding `.py` config file** to set parameters such as data paths and experiment names.
+
+### 3. Training
+
+Once your configuration file is set up, you can start training. The training process typically requires about 100 epochs to converge. The final model checkpoint (`checkpoint.pth`) saved at the end of training is recommended for inference.
+
+* **To start supervised training:**
+    ```bash
+    python train_supervised_denoise.py
+    ```
+
+* **To start self-supervised training:**
+    ```bash
+    python train_self_supervised_denoise.py
+    ```
+
+### 4. Inference / Denoising
+
+To denoise a new volume using a trained model:
+1.  Edit the corresponding inference config file in `configs/`.
+2.  Set the `pred_volume_dir` to your input data dir and the `load_from` to your trained model (`.pth` file). The trained model will be loaded and denoise all '.tif' files in the dir.
+3.  Run the inference script:
+    ```bash
+    python volume_inference.py
+    ```
+
+## Model Details
+
+The primary focus of this work is on the acquisition strategy and processing workflow rather than novel network architecture. The model used is a standard, robust U-Net network.
+
+**Note:** The current implementation is optimized for stability and clarity, and thus only supports `batch_size=1` This batch size is fixed in our code.
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+## Contact
+
+This is an initial release of our project code. We welcome any questions, bug reports, and discussions. Please feel free to open an issue on this GitHub repository or contact us via email at chenbohao2024@ia.ac.cn.
