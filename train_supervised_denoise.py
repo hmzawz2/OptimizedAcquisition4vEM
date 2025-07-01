@@ -40,7 +40,7 @@ train_loader = get_supervised_dataloader(
     Path(args.data_root),
     "train",
     patch_size = (5, 128, 128),
-    num_samples_per_epoch = 61,
+    num_samples_per_epoch = 540,
     use_fast_slow_emulation = (args.use_fast_slow == 1),
 )
 val_loader = get_supervised_dataloader(
