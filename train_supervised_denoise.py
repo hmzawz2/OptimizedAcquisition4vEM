@@ -152,8 +152,7 @@ def main(args):
     if args.pretrained:
         print(f"Loading pretrained model from: {args.pretrained}")
         checkpoint = torch.load(args.pretrained, map_location=device)
-        # Add robust model loading logic here if needed
-        model.load_state_dict(checkpoint['state_dict'])
+        model.load_state_dict(checkpoint['state_dict'], strict=True)
 
     best_psnr = 0.0
     global_step = 0

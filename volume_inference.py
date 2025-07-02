@@ -62,7 +62,7 @@ if __name__ == "__main__":
     # ----------
     model = GShiftNet()
     model = torch.nn.DataParallel(model).to(device)
-    model.load_state_dict(torch.load(args.load_from)["state_dict"] , strict=True)
+    model.load_state_dict(torch.load(args.load_from)["state_dict"], strict=True)
     model.eval()
 
     # ------------------

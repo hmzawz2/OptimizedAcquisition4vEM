@@ -3,6 +3,13 @@ __pycache__/
 */__pycache__
 *.tif
 *.pth
+
+!ckpt/Fig2/
+!ckpt/Fig2/supervised.pth
+!ckpt/Fig3/
+!ckpt/Fig3/self-supervised.pth
+!data/fast_scan_z25.tif
+
 ckpt/*
 log/*
 output/*

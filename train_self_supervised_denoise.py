@@ -88,7 +88,7 @@ def train(epoch: int, global_step: int):
         if i % args.log_iter == 0:
             current_step = global_step + i
             log_prefix = f"Epoch: {epoch} [{i}/{len(train_loader)}]"
-            log_items = [f"{name}_loss: {tracker.avg:.4f}" for name, tracker in loss_trackers.items()]
+            log_items = [f"{name}_loss:{tracker.avg:.4f}" for name, tracker in loss_trackers.items()]
             tqdm.write(f"{log_prefix}\t" + "\t".join(log_items))
 
             for name, tracker in loss_trackers.items():
@@ -151,8 +151,7 @@ def main(args):
     if args.pretrained:
         print(f"Loading pretrained model from: {args.pretrained}")
         checkpoint = torch.load(args.pretrained, map_location=device)
-        # Add robust model loading logic here if needed
-        model.load_state_dict(checkpoint['state_dict'])
+        model.load_state_dict(checkpoint['state_dict'], strict=True)
 
     best_psnr = 0.0
     global_step = 0

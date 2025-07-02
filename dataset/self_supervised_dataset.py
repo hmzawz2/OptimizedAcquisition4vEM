@@ -95,7 +95,13 @@ class SelfSupervisedDenoisingDataset(Dataset):
         noisy_patch = noisy_patch.astype(np.float32) / 255.0
 
         # 5. Split the noisy patch into a source/target pair for self-supervision
-        source_patch, target_patch = split_checkerboard(noisy_patch)
+        if self.is_training:
+            source_patch, target_patch = split_checkerboard(noisy_patch)
+        else:
+            source_patch = noisy_patch[:, 0::2, 0::2]
+            target_patch = (noisy_patch[:, 0::2, 1::2] + 
+                            noisy_patch[:, 1::2, 0::2] + 
+                            noisy_patch[:, 1::2, 1::2]) / 3.0
         
         # 6. Convert to PyTorch tensors
         source_tensor = torch.from_numpy(np.ascontiguousarray(source_patch)).unsqueeze(0)
