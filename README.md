@@ -24,7 +24,7 @@ The repository is organized as follows:
 ├── configs/                           # Configuration files(.py)
 ├── log/                               # Training logs and TensorBoard files
 ├── figs/                              # Figures for documentation
-├── data/                              # Directory for sample input stacks
+├── data/                              # Directory for example data
 ├── environment_optimized_vem.yml      # Conda environment configuration
 ├── train_supervised_denoise.py        # Supervised training script
 ├── train_self_supervised_denoise.py   # Self-supervised training script
@@ -80,7 +80,7 @@ This project uses configuration files located in the `configs/` directory instea
 
 ### 3. Training
 
-Once your configuration file is set up, you can start training. The training process typically requires about 30 epochs for supervised model and 80 epochs for self-supervised model to converge. The final model checkpoint (`checkpoint.pth`) saved at the end of training is recommended for inference.We offer two pretrained model (both ckpt/Fig2/supervised.pth and ckpt/Fig3/self-supervised.pth) for users. It is recommanded for users to use supervised.pth first, as it had trained on supervision.
+Once your configuration file is set up, you can start training. The training process typically requires about 30 epochs for supervised model and 80 epochs for self-supervised model to converge. The final model checkpoint (`checkpoint.pth`) saved at the end of training is recommended for inference. We offer two pretrained model (both `ckpt/Fig2/supervised.pth` and `ckpt/Fig3/self-supervised.pth`) for users. It is recommanded for users to use `supervised.pth` first, as it had trained on supervision.
 
 
 * **To start supervised training:**
@@ -97,7 +97,7 @@ Once your configuration file is set up, you can start training. The training pro
 
 To denoise a new volume using a trained model:
 1.  Edit the corresponding inference config file in `configs/`.
-2.  Set the `pred_volume_dir` to your input data dir and the `load_from` to your trained model (`.pth` file). The trained model will be loaded and denoise all '.tif' files in the dir. We offer a small crop of fast scan volume on 25nm thickness (data/fast_scan_z25.tif) for users to test.
+2.  Set the `pred_volume_dir` to your input data dir and the `load_from` to your trained model (`.pth` file). The trained model will be loaded and denoise all `.tif` files in the dir. We offer a small crop of fast scan volume on 25nm thickness (`data/fast_scan_z25.tif`) for users to test.
 3.  Run the inference script:
     ```bash
     python volume_inference.py
