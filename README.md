@@ -38,7 +38,7 @@ We recommend using Conda to manage the environment for consistency and reproduci
 
 1.  **Clone this repository:**
     ```bash
-    git clone [https://github.com/hmzawz2/OptimizedAcquisition4vEM.git](https://github.com/hmzawz2/OptimizedAcquisition4vEM.git)
+    git clone https://github.com/hmzawz2/OptimizedAcquisition4vEM.git
     cd OptimizedAcquisition4vEM
     ```
 
@@ -107,7 +107,7 @@ To denoise a new volume using a trained model:
 
 The primary focus of this work is on the acquisition strategy and processing workflow rather than novel network architecture. The model used is a standard, robust U-Net network.
 
-**Note:** The current implementation is optimized for stability and clarity, and thus only supports `batch_size=1` This batch size is fixed in our code.
+**Note:** The current implementation is optimized for stability and clarity, and thus only supports `batch_size=1`. This batch size is fixed in our code.
 
 ## License
 
